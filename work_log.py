@@ -21,6 +21,15 @@ def new_search():
             print("Try again!")
 
 
+def open_file():
+    """Opens the csv file and returns a list """
+    with open('entries.csv', newline='') as csvfile:  # reads the csv file
+        fieldnames = ["Date", "Task", "Time", "Notes"]
+        entries = csv \
+            .DictReader(csvfile, fieldnames=fieldnames, delimiter=',')
+        return list(entries)
+
+
 def search_entry():
     """Provides the user with a list of options to
     search the csv file and calls the appropriate search functions
@@ -36,69 +45,64 @@ def search_entry():
     ''')
 
     while True:
-        with open('entries.csv', newline='') as csvfile:  # reads the csv file
-            fieldnames = ["Date", "Task", "Time", "Notes"]
-            entries = csv\
-                .DictReader(csvfile, fieldnames=fieldnames, delimiter=',')
-            rows = list(entries)
+        rows = open_file()
+        user_input = input("How Do You Want To Search? ")
 
-            user_input = input("How Do You Want To Search? ")
+        if user_input.upper() == "A":  # Search by date
+            clear_screen()
+            print("All Existing Dates:")
+            for row in rows:
+                print(row["Date"])
 
-            if user_input.upper() == "A":  # Search by date
-                clear_screen()
-                print("All Existing Dates:")
-                for row in rows:
-                    print(row["Date"])
+            while True:
+                search_date = input("Enter a Date from the List Above: ")
+                if re.search(r'(\d\d/\d\d/\d\d\d\d)', search_date):
+                    break
+                print("Please, Enter a valid date!")
+            search_by_date(search_date, rows)
+            new_search()
 
-                while True:
-                    search_date = input("Enter a Date from the List Above: ")
-                    if re.search(r'(\d\d/\d\d/\d\d\d\d)', search_date):
-                        break
-                    print("Please, Enter a valid date!")
-                search_by_date(search_date, rows)
-                new_search()
+        elif user_input.upper() == "B":  # search by time
+            clear_screen()
+            print("All Logged Time in Minutes:")
+            for row in rows:
+                print(row["Time"])
 
-            elif user_input.upper() == "B":  # search by time
-                clear_screen()
-                print("All Logged Time in Minutes:")
-                for row in rows:
-                    print(row["Time"])
-
-                while True:
-                    amount_of_time = input("Enter Time from the List Above: ")
-                    try:
-                        int(amount_of_time)
-                    except ValueError:
-                        print("Please enter a valid number!")
-                    else:
-                        search_by_time(amount_of_time, rows)
-                        new_search()
-
-            elif user_input.upper() == "C":  # search by exact search
-                clear_screen()
+            while True:
+                amount_of_time = input("Enter Time from the List Above: ")
                 try:
-                    user_input = \
-                        str(input("Enter a String for Exact Search: "))
+                    int(amount_of_time)
                 except ValueError:
-                    print("Please, Enter a String of Characters")
+                    print("Please enter a valid number!")
                 else:
-                    exact_search(user_input, rows)
+                    search_by_time(amount_of_time, rows)
                     new_search()
 
-            elif user_input.upper() == "D":  # search by regex pattern
-                clear_screen()
-                print("Enter a Regex Pattern! Example: \d{3}\s\d{3}")
-                regex_input = input("Enter Pattern: ")
-                regex_search(regex_input, rows)
+        elif user_input.upper() == "C":  # search by exact search
+            clear_screen()
+            try:
+                user_input = \
+                    str(input("Enter a String for Exact Search: "))
+            except ValueError:
+                print("Please, Enter a String of Characters")
+            else:
+                exact_search(user_input, rows)
                 new_search()
 
-            elif user_input.upper() == "E":  # return to main menu
-                clear_screen()
-                start_screen()
+        elif user_input.upper() == "D":  # search by regex pattern
+            clear_screen()
+            print("Enter a Regex Pattern! Example: \d{3}\s\d{3}")
+            regex_input = input("Enter Pattern: ")
+            regex_search(regex_input, rows)
+            new_search()
 
-            else:
-                print("Please, Enter a Valid Choice!")
-                pass
+        elif user_input.upper() == "E":  # return to main menu
+            clear_screen()
+            start_screen()
+
+        else:
+            print("Please, Enter a Valid Choice!")
+            pass
 
 
 def start_screen():
